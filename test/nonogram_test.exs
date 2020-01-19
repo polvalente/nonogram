@@ -42,7 +42,7 @@ defmodule NonogramTest do
                [true, false, true, true, true],
                [true, true, true, true, nil],
                [true, nil, nil, nil, nil],
-               [true, nil, true, nil, true]
+               [true, false, true, false, true]
              ],
              height: 5,
              width: 5
