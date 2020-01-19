@@ -5,10 +5,10 @@ defmodule Nonogram.TableTest do
     %{
       first: %Nonogram.Table{
         contents: [
-          [false, true, false, true, false],
-          [true, false, true, false, true],
-          [false, false, false, false, false],
-          [false, false, true, false, false],
+          [nil, true, nil, true, nil],
+          [true, nil, true, nil, true],
+          [nil, nil, nil, nil, nil],
+          [nil, nil, true, nil, nil],
           [false, false, true, false, false]
         ],
         height: 5,
@@ -16,11 +16,11 @@ defmodule Nonogram.TableTest do
       },
       second: %Nonogram.Table{
         contents: [
-          [true, false, true, false, true],
-          [false, true, false, true, false],
-          [false, false, false, false, false],
+          [true, nil, true, nil, true],
+          [nil, true, nil, true, nil],
+          [nil, nil, nil, false, false],
           [false, false, true, false, false],
-          [false, false, true, false, false]
+          [nil, nil, true, nil, nil]
         ],
         height: 5,
         width: 5
@@ -33,7 +33,7 @@ defmodule Nonogram.TableTest do
       assert String.trim_trailing("""
              _*_*_
              *_*_*
-             _____
+             .....
              __*__
              __*__
              """) == String.Chars.to_string(first)
@@ -41,7 +41,7 @@ defmodule Nonogram.TableTest do
       assert String.trim_trailing("""
              *_*_*
              _*_*_
-             _____
+             ...__
              __*__
              __*__
              """) == String.Chars.to_string(second)
@@ -54,7 +54,7 @@ defmodule Nonogram.TableTest do
         contents: [
           [true, true, true, true, true],
           [true, true, true, true, true],
-          [false, false, false, false, false],
+          [nil, nil, nil, false, false],
           [false, false, true, false, false],
           [false, false, true, false, false]
         ],

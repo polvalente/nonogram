@@ -1,4 +1,11 @@
 defmodule Nonogram.Table do
+  @moduledoc """
+  A `%Table{}` struct contains the `:contents` key.
+  `:contents` is a bi-dimensional matrix, in which:
+    - `true` indicates there IS an element
+    - `false` indicates there IS NOT an element
+    - `nil` indicates no assertion has been made for the cell
+  """
   defstruct [:contents, :height, :width]
 
   @type t :: %__MODULE__{
@@ -11,7 +18,7 @@ defmodule Nonogram.Table do
   def new(height, width) do
     contents =
       Enum.reduce(1..height, [], fn _, acc ->
-        row = [false] |> Stream.cycle() |> Enum.take(width)
+        row = [nil] |> Stream.cycle() |> Enum.take(width)
 
         [row | acc]
       end)
@@ -29,8 +36,7 @@ defmodule Nonogram.Table do
 
     contents =
       flat_first
-      |> Enum.zip(flat_second)
-      |> Enum.map(fn {x, y} -> x || y end)
+      |> combine_row(flat_second)
       |> Enum.chunk_every(width)
 
     %{original | contents: contents}
@@ -44,15 +50,9 @@ defmodule Nonogram.Table do
 
     semi_defined_rows = get_semi_defined(remaining_rows, width)
 
-    val =
-      table
-      |> set_defined_row_elements(Map.new(fully_defined_rows))
-
-    IO.inspect(val, label: "defined")
-
-    val
+    table
+    |> set_defined_row_elements(Map.new(fully_defined_rows))
     |> set_semi_defined_row_elements(Map.new(semi_defined_rows))
-    |> IO.inspect(label: "semi_defined")
   end
 
   def mark_defined(%{contents: contents} = table, cols: col_definitions) do
@@ -96,8 +96,7 @@ defmodule Nonogram.Table do
           definition ->
             definition
             |> gen_defined()
-            |> Enum.zip(row)
-            |> Enum.map(fn {x, y} -> x || y end)
+            |> combine_row(row)
         end
       end)
 
@@ -119,8 +118,7 @@ defmodule Nonogram.Table do
           definition ->
             definition
             |> gen_semi_defined(width)
-            |> Enum.zip(row)
-            |> Enum.map(fn {x, y} -> x || y end)
+            |> combine_row(row)
         end
       end)
 
@@ -139,7 +137,7 @@ defmodule Nonogram.Table do
   defp gen_semi_defined(definition, width) do
     half = div(width, 2)
 
-    empty = [false] |> Stream.cycle() |> Enum.take(width)
+    empty = [nil] |> Stream.cycle() |> Enum.take(width)
 
     case Enum.find(definition, &(&1 > half)) do
       nil ->
@@ -152,23 +150,30 @@ defmodule Nonogram.Table do
             # i.e width 10, val = 7
             # elements = 7 - 5 = 2
             # range = 3..6
-            range = (half - elements)..(half + elements - 1)
-            IO.inspect(val, label: "val")
-            IO.inspect(half, label: "half")
-            IO.inspect(elements, label: "elements")
-            IO.inspect(range, label: "range")
-          else
-            elements = val - half
-            range = (half - elements + 1)..(half + elements - 1)
 
-            IO.inspect(val, label: "val")
-            IO.inspect(half, label: "half")
-            IO.inspect(elements, label: "elements")
-            IO.inspect(range, label: "range")
+            (half - elements)..(half + elements - 1)
+          else
+            # i.e width 5, val = 4
+            # half = 2
+            # elements = 4 - 2 = 2
+            # range = (2 - 2 + 1)..(2 + 2 - 1) = 1..3
+
+            elements = val - half
+            (half - elements + 1)..(half + elements - 1)
           end
 
-        Enum.map(0..(width - 1), fn x -> x in range end)
+        Enum.map(0..(width - 1), fn x -> x in range || nil end)
     end
+  end
+
+  defp combine_row(this, other) do
+    this
+    |> Enum.zip(other)
+    |> Enum.map(fn
+      {x, y} when x == true or y == true -> true
+      {x, y} when x == false or y == false -> false
+      _ -> nil
+    end)
   end
 
   defimpl String.Chars, for: __MODULE__ do
@@ -177,8 +182,9 @@ defmodule Nonogram.Table do
       |> Enum.map(fn row ->
         row
         |> Enum.map(fn
-          false -> "_"
+          false -> "."
           true -> "*"
+          nil -> "_"
         end)
         |> Enum.join()
       end)

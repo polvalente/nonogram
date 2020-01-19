@@ -12,12 +12,12 @@ defmodule Nonogram do
           width :: non_neg_integer,
           rows :: list(description),
           columns :: list(description)
-        ) :: list(list(boolean()))
+        ) :: Table.t()
   def solve(height, width, rows, cols) do
-    table =
-      height
-      |> Table.new(width)
-      |> Table.mark_defined(rows: rows)
-      |> Table.mark_defined(cols: cols)
+    height
+    |> Table.new(width)
+    |> Table.mark_defined(rows: rows)
+    |> IO.inspect(label: "defined_rows")
+    |> Table.mark_defined(cols: cols)
   end
 end

@@ -9,10 +9,10 @@ defmodule NonogramTest do
     assert Nonogram.solve(5, 5, row_definitions, col_definitions) == %Nonogram.Table{
              contents: [
                [true, true, true, true, true],
-               [false, false, false, true, false],
-               [false, true, true, true, true],
-               [false, true, true, true, false],
-               [false, true, false, false, false]
+               [nil, false, nil, true, nil],
+               [nil, true, true, true, true],
+               [nil, true, true, true, nil],
+               [nil, true, nil, nil, nil]
              ],
              height: 5,
              width: 5
@@ -23,11 +23,11 @@ defmodule NonogramTest do
 
     assert Nonogram.solve(5, 5, row_definitions, col_definitions) == %Nonogram.Table{
              contents: [
-               [false, false, false, false, false],
-               [false, false, false, false, false],
-               [false, true, true, true, false],
-               [false, false, false, false, false],
-               [false, false, false, false, false]
+               [nil, nil, nil, nil, nil],
+               [nil, nil, nil, nil, nil],
+               [nil, true, true, true, nil],
+               [nil, nil, nil, nil, nil],
+               [nil, nil, nil, nil, nil]
              ],
              height: 5,
              width: 5
@@ -40,9 +40,9 @@ defmodule NonogramTest do
              contents: [
                [true, true, false, true, true],
                [true, false, true, true, true],
-               [true, true, true, true, false],
-               [true, false, false, false, false],
-               [true, false, true, false, true]
+               [true, true, true, true, nil],
+               [true, nil, nil, nil, nil],
+               [true, nil, true, nil, true]
              ],
              height: 5,
              width: 5
