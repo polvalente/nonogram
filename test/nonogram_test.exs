@@ -9,10 +9,10 @@ defmodule NonogramTest do
     assert Nonogram.solve(5, 5, row_definitions, col_definitions) == %Nonogram.Table{
              contents: [
                [true, true, true, true, true],
-               [nil, false, nil, true, nil],
-               [nil, true, true, true, true],
-               [nil, true, true, true, nil],
-               [nil, true, nil, nil, nil]
+               [false, false, false, true, nil],
+               [false, true, true, true, true],
+               [false, true, true, true, false],
+               [false, true, false, false, false]
              ],
              height: 5,
              width: 5
@@ -40,8 +40,8 @@ defmodule NonogramTest do
              contents: [
                [true, true, false, true, true],
                [true, false, true, true, true],
-               [true, true, true, true, nil],
-               [true, nil, nil, nil, nil],
+               [true, true, true, true, false],
+               [true, nil, false, false, false],
                [true, false, true, false, true]
              ],
              height: 5,

@@ -6,6 +6,7 @@ defmodule Nonogram.Table do
     - `false` indicates there IS NOT an element
     - `nil` indicates no assertion has been made for the cell
   """
+  @derive [Inspect]
   defstruct [:contents, :height, :width]
 
   @type t :: %__MODULE__{
@@ -13,6 +14,8 @@ defmodule Nonogram.Table do
           height: non_neg_integer,
           width: non_neg_integer
         }
+
+  @type definitions :: list(list(non_neg_integer))
 
   @spec new(height :: non_neg_integer, width :: non_neg_integer) :: t()
   def new(height, width) do
@@ -42,28 +45,80 @@ defmodule Nonogram.Table do
     %{original | contents: contents}
   end
 
-  @spec mark_defined(table :: t(), [{:rows | :cols, list(list(non_neg_integer))}]) :: t()
-  def mark_defined(%{width: width} = table, rows: row_definitions) do
+  @spec mark_defined(table :: t(), rows: definitions, cols: definitions) :: t()
+  def mark_defined(table, rows: rows, cols: cols) do
+    table
+    |> mark_defined_rows(rows)
+    |> mark_defined_cols(cols)
+    |> post_check(rows: rows, cols: cols)
+  end
+
+  defp mark_defined_rows(%{width: width} = table, row_definitions) do
     indexed_rows = row_definitions |> Enum.with_index() |> Enum.map(fn {x, y} -> {y, x} end)
 
     {fully_defined_rows, remaining_rows} = get_fully_defined(indexed_rows, width)
+    fully_defined_rows = Map.new(fully_defined_rows)
 
-    semi_defined_rows = get_semi_defined(remaining_rows, width)
+    semi_defined_rows =
+      remaining_rows
+      |> get_semi_defined(width)
+      |> Map.new()
 
     table
-    |> set_defined_row_elements(Map.new(fully_defined_rows))
-    |> set_semi_defined_row_elements(Map.new(semi_defined_rows))
+    |> set_defined_row_elements(fully_defined_rows)
+    |> set_semi_defined_row_elements(semi_defined_rows)
   end
 
-  def mark_defined(%{contents: contents} = table, cols: col_definitions) do
+  defp mark_defined_cols(%{contents: contents} = table, col_definitions) do
     updated =
       table
       |> Map.put(:contents, transpose(contents))
-      |> mark_defined(rows: col_definitions)
+      |> mark_defined_rows(col_definitions)
       |> Map.get(:contents)
       |> transpose()
 
     %{table | contents: updated}
+  end
+
+  defp post_check(%__MODULE__{contents: contents} = table,
+         rows: row_definitions,
+         cols: col_definitions
+       ) do
+    updated =
+      contents
+      |> post_check_rows(row_definitions)
+      |> post_check_cols(col_definitions)
+
+    %{table | contents: updated}
+  end
+
+  defp post_check_cols(contents, definitions) do
+    contents
+    |> transpose()
+    |> post_check_rows(definitions)
+    |> transpose()
+  end
+
+  defp post_check_rows(contents, definitions) do
+    # checks if there are any remaining rows that are now solved, and marks them as such
+    contents
+    |> Enum.with_index()
+    |> Enum.map(fn {row, idx} ->
+      case Enum.at(definitions, idx) do
+        [] ->
+          row
+
+        values ->
+          expected = Enum.sum(values)
+          current = Enum.count(row, & &1)
+
+          if current == expected do
+            Enum.map(row, fn x -> x == true end)
+          else
+            row
+          end
+      end
+    end)
   end
 
   defp transpose(matrix) do

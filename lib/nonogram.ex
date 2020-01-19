@@ -5,19 +5,15 @@ defmodule Nonogram do
 
   alias Nonogram.Table
 
-  @type description :: list(non_neg_integer())
-
   @spec solve(
           height :: non_neg_integer,
           width :: non_neg_integer,
-          rows :: list(description),
-          columns :: list(description)
+          rows :: Table.definitions(),
+          columns :: Table.definitions()
         ) :: Table.t()
   def solve(height, width, rows, cols) do
     height
     |> Table.new(width)
-    |> Table.mark_defined(rows: rows)
-    |> IO.inspect(label: "defined_rows")
-    |> Table.mark_defined(cols: cols)
+    |> Table.mark_defined(rows: rows, cols: cols)
   end
 end

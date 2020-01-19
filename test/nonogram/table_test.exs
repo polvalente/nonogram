@@ -8,7 +8,7 @@ defmodule Nonogram.TableTest do
           [nil, true, nil, true, nil],
           [true, nil, true, nil, true],
           [nil, nil, nil, nil, nil],
-          [nil, nil, true, nil, nil],
+          [nil, nil, false, nil, nil],
           [false, false, true, false, false]
         ],
         height: 5,
@@ -33,16 +33,16 @@ defmodule Nonogram.TableTest do
       assert String.trim_trailing("""
              _*_*_
              *_*_*
-             .....
-             __*__
-             __*__
+             _____
+             __.__
+             ..*..
              """) == String.Chars.to_string(first)
 
       assert String.trim_trailing("""
              *_*_*
              _*_*_
-             ...__
-             __*__
+             ___..
+             ..*..
              __*__
              """) == String.Chars.to_string(second)
     end
